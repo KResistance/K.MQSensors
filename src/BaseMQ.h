@@ -50,6 +50,7 @@ public:
     BaseMQ(uint8_t pin, uint8_t pinHeater);
     void calibrate();
     void calibrate(float ro);
+    void calibrate(float t, float h);
     void heaterPwrHigh();
     void heaterPwrLow();
     void heaterPwrOff();
@@ -63,7 +64,9 @@ public:
 
 protected:
     float readScaled(float a, float b) const;
+    float readCorrectedScaled(float a, float b, float t, float h) const; 
     float getCorrectionFactor(float t, float h) const;
+    float readCorrectedRs(float t, float h) const;
     virtual float getRoInCleanAir() const = 0;
     virtual float getRL() const = 0;
 
