@@ -14,6 +14,7 @@ public:
     MQ135(uint8_t pin);
     MQ135(uint8_t pin, uint8_t pinHeater);
     unsigned long readCO2();
+    unsigned long readCorrectedCO2(float t, float h);
 private:
     virtual float getRL() const { return MQ135_RL_BOARD; }
     virtual float getRoInCleanAir() const { return exp((log(PPM_CO2_IN_CLEAR_AIR) * -0.42) + 1.92); }

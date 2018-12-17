@@ -36,6 +36,45 @@ void BaseMQ::calibrate() {
   calibrate(ro);
 }
 
+void BaseMQ::calibrate(float t, float h) {
+  float rs = readCorrectedRs(t, h);
+  float ro = rs / getRoInCleanAir();
+  calibrate(ro);
+}
+
+/**************************************************************************/
+/*!
+@brief  Get the correction factor to correct for temperature and humidity
+@param[in] t  The ambient air temperature
+@param[in] h  The relative humidity
+@return The calculated correction factor
+*/
+/**************************************************************************/
+float BaseMQ::getCorrectionFactor(float t, float h) const {
+    // Linearization of the temperature dependency curve under and above 20 degree C
+    // below 20degC: fact = a * t * t - b * t - (h - 33) * d
+    // above 20degC: fact = a * t + b * h + c
+    // this assumes a linear dependency on humidity
+    if(t < 20){
+        return CORA * t * t - CORB * t + CORC - (h-33.)*CORD;
+    } else {
+        return CORE * t + CORF * h + CORG;
+    }
+}
+
+/**************************************************************************/
+/*!
+@brief  Get the resistance of the sensor, ie. the measurement value corrected
+        for temp/hum
+@param[in] t  The ambient air temperature
+@param[in] h  The relative humidity
+@return The corrected sensor resistance kOhm
+*/
+/**************************************************************************/
+float BaseMQ::readCorrectedRs(float t, float h) const {
+  return readRs()/getCorrectionFactor(t, h);
+}
+
 // включение нагревателя на 100%
 void BaseMQ::heaterPwrHigh() {
   digitalWrite(_pinHeater, HIGH);
@@ -77,6 +116,11 @@ float BaseMQ::calculateResistance(int sensorADC) const {
 }
 
 float BaseMQ::readScaled(float a, float b) const {
+  float ratio = readRatio();
+  return exp((log(ratio) - b) / a);
+}
+
+float BaseMQ::readCorrectedScaled(float a, float b, float t, float h) const {
   float ratio = readRatio();
   return exp((log(ratio) - b) / a);
 }
