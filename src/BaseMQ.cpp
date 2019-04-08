@@ -121,7 +121,7 @@ float BaseMQ::readScaled(float a, float b) const {
 }
 
 float BaseMQ::readCorrectedScaled(float a, float b, float t, float h) const {
-  float ratio = readRatio();
+  float ratio = readCorrectedRs(t, h) / getRo();
   return exp((log(ratio) - b) / a);
 }
 
