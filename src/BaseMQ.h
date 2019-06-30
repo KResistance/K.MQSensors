@@ -24,6 +24,15 @@
 // масимальное значение АЦП
 #define ADC_VALUE_MAX       pow(2, ADC_BIT)
 
+/// Parameters to model temperature and humidity dependence
+#define CORA 0.00035
+#define CORB 0.02718
+#define CORC 1.39538
+#define CORD 0.0018
+#define CORE -0.003333333
+#define CORF -0.001923077
+#define CORG 1.130128205
+
 #if defined(ARDUINO_ARCH_ESP32)
 #define analogWrite ledcWrite
 #endif
@@ -41,6 +50,7 @@ public:
     BaseMQ(uint8_t pin, uint8_t pinHeater);
     void calibrate();
     void calibrate(float ro);
+    void calibrate(float t, float h);
     void heaterPwrHigh();
     void heaterPwrLow();
     void heaterPwrOff();
@@ -54,6 +64,9 @@ public:
 
 protected:
     float readScaled(float a, float b) const;
+    float readCorrectedScaled(float a, float b, float t, float h) const; 
+    float getCorrectionFactor(float t, float h) const;
+    float readCorrectedRs(float t, float h) const;
     virtual float getRoInCleanAir() const = 0;
     virtual float getRL() const = 0;
 
